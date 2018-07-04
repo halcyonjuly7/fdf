@@ -1,0 +1,6 @@
+*.out
+*.sw*
+.idea/
+cmake-build*
+*.bak
+

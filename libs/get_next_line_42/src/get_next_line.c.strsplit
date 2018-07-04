@@ -1,0 +1,79 @@
+//
+// Created by halcyonjuly7 on 4/18/18.
+//
+
+#include <libft.h>
+#include <get_next_line.h>
+
+void arr_insert(t_arr *arr, char new_char)
+{
+	if(arr->contents == arr->size)
+		arr_resize(arr, arr->size * 2);
+	arr->buffer[arr->contents] = new_char;
+	arr->contents++;
+	arr->buffer[arr->contents] = '\0';
+
+
+}
+
+void arr_resize(t_arr *arr, int new_size)
+{
+	int index;
+	char *new_str;
+
+	index = 0;
+	new_str = ft_strnew(new_size);
+	while(arr->buffer[index])
+	{
+		new_str[index] = arr->buffer[index];
+		index++;
+	}
+	ft_strdel(&arr->buffer);
+	arr->buffer = new_str;
+	arr->size = new_size;
+
+}
+
+int get_next_line(const int fd, char **line)
+{
+	static t_cache *cache;
+	t_arr local;
+	int read_lines;
+	char *buff;
+	int index;
+
+	if (fd < 0 || read(fd, 0,0) < 0)
+		return (-1);
+
+	if (!cache)
+	{
+		cache = malloc(sizeof(t_cache));
+		cache->lines = NULL;
+		cache->current = 0;
+		cache->size = BUFF_SIZE;
+		local.buffer = ft_strnew(BUFF_SIZE);
+		local.size = BUFF_SIZE;
+		local.contents = 0;
+		buff = ft_strnew(BUFF_SIZE + 1);
+		while ((read_lines = read(fd, buff, BUFF_SIZE)) > 0)
+		{
+			index = 0;
+			buff[read_lines] = '\0';
+			while (buff[index])
+				arr_insert(&local, buff[index++]);
+		}
+		cache->lines = ft_strsplit(local.buffer, '\n');
+		ft_strdel(&local.buffer);
+		ft_strdel(&buff);
+	}
+	if(cache->lines[cache->current] == '\0')
+	{
+		free(cache->lines);
+		free(cache);
+		return (0);
+	}
+
+	*line = ft_strdup(cache->lines[cache->current]);
+	free(cache->lines[cache->current++]);
+	return (1);
+}
